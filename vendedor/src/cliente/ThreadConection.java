@@ -3,19 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package vendedor;
+package cliente;
 
 /**
  *
  * @author Teeu Guima
  */
-public class Vendedor {
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
+public class ThreadConection extends Thread {
+    private ClienteTratamento cliente;
+    
+    public ThreadConection(ClienteTratamento cliente){
+        this.cliente = cliente;
     }
+    
     
 }
