@@ -10,10 +10,9 @@ public class ControladorDeMensagens {
         mensagemPessoaFis = new Mensagem();
     }
 
-    public void novaMensagem(/*byte[] bytes*/ String info) {
-        
-        //mensagemPessoaFis.setBytes(bytes);
-        mensagemPessoaFis.setMessage(info);
+    public void novaMensagem(byte[] bytes) {
+        System.out.println("Enviandooo");
+        mensagemPessoaFis.setBytes(bytes);
         mensagemPessoaFis.setHasMensagemToTrue();
 
     }

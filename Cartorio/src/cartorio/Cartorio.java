@@ -21,17 +21,22 @@ public class Cartorio {
 
     private static ServidorFacade facade;
     private static ThreadConections tcIO;
-    private Conexao conexao;
 
     public Cartorio() throws IOException, FileNotFoundException, ClassNotFoundException {
         facade = ServidorFacade.getInstance();
-        conexao = new Conexao();
     }
-
+   /* 
+    public ServidorFacade getFacade(){
+        return facade;
+    }
+    */
     public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException, IOException {
         //Cartorio cartorio = new Cartorio();
         //  ServerSocket serverSock = new ServerSocket(5555);
         //  cartorio.conexao.criarServerSocket();
+        Cartorio cartorio = new Cartorio();
+        facade.criandoArquivos();
+        facade.lerDados();
         Conexao conexao = new Conexao(facade);
         conexao.criarServerSocket();
         try {
@@ -42,6 +47,7 @@ public class Cartorio {
                 //tcIO = new ThreadConections(facade.getConectionIOADM(), facade.getConectionIOSensor());
                 System.out.println("Tudo Certo!");
                 new Thread(tcIO).start();
+                facade.armazenarDados();
             }
         } catch (IOException | NullPointerException ex) {
             // ex.printStackTrace();
@@ -49,14 +55,6 @@ public class Cartorio {
         }
     }
 
-    private ConectionIO conectarClientes() throws IOException, FileNotFoundException, ClassNotFoundException {
-        Conexao conexao = new Conexao(facade);
-        conexao.iniciar();
-        return conexao.getConectionIO();
-        
-        
-        //  facade.criandoArquivos();
-        //  facade.lerDados();
-    }
+    
 
 }

@@ -19,7 +19,7 @@ public class ThreadConections extends Thread {
                 pessoafisica.tratar();
 
             } catch (IOException | ClassNotFoundException ex) {
-                System.out.println("Erro: " + ex);
+               //System.out.println("Erro: " + ex);
                 interrupt();
                 flag = false;
             } catch (InterruptedException ex) {

@@ -5,32 +5,43 @@
  */
 package model;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+
 /**
  *
  * @author Teeu Guima
  */
-public class Perfil {
+public class Perfil implements Serializable {
 
     private String nome;
     private String sobrenome;
-    
-    
     private String cpf;
     private String rg;
     private String email;
-    private String senha;
     private String telefone;
-
-    public Perfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, String senha) {
+    private byte[] senhaCriptografada;
+    
+   // private ArrayList<byte[]> documentos;
+    
+    public Perfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, byte[] senha) {
         this.nome = nome;
         this.sobrenome = sobrenome;
         this.cpf = cpf;
         this.rg = rg;
         this.email = email;
-        this.senha = senha;
+        this.senhaCriptografada = senha;
         this.telefone = telefone;
     }
 
+    public byte[] getSenhaCriptografada(){
+        return senhaCriptografada;
+    }
+    
+    public void setSenhaCriptografada(byte[] senhaCriptografada) {
+        this.senhaCriptografada = senhaCriptografada;
+    }
+    
     public String getCpf() {
         return cpf;
     }
@@ -47,14 +58,6 @@ public class Perfil {
         this.rg = rg;
     }
 
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-    
     public String getNome() {
         return nome;
     }
@@ -86,5 +89,7 @@ public class Perfil {
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }
+    
+    
 
 }

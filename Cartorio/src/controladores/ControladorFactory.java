@@ -10,7 +10,7 @@ public class ControladorFactory {
      */
     public ControladorFactory() {} 
     
-    public Perfil factoryPerfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, String senha){
+    public Perfil factoryPerfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, byte[] senha){
         return new Perfil(nome, sobrenome, cpf, rg, email, telefone, senha);
     }
     

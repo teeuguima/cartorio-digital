@@ -8,21 +8,24 @@ import controladores.ControladorDeMensagens;
 import controladores.ControllerDeTratamento;
 import controladores.ControladorFactory;
 import excecoes.DadosIncorretosException;
+import excecoes.DocumentoCadastradoException;
 import excecoes.LoginRealizadoException;
 import excecoes.PerfilCadastradoException;
 import excecoes.PerfilNaoCadastradoException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import model.Perfil;
 
 public class ServidorFacade {
 
     private final ControladorDeDados dados;
     private final ControladorFactory factory;
     private final ControladorDeClientes clientes;
-   
-   
-
     private static ServidorFacade facade;
 
     /**
@@ -32,11 +35,9 @@ public class ServidorFacade {
      * feitas a partir desta classe, e nenhum controlador vai ser acessado senão
      * por ela.
      */
-    private ServidorFacade() throws IOException, FileNotFoundException, ClassNotFoundException {
+    public ServidorFacade() throws IOException, FileNotFoundException, ClassNotFoundException {
         dados = new ControladorDeDados();
         factory = new ControladorFactory();
-
-        
         clientes = new ControladorDeClientes();
     }
 
@@ -44,20 +45,23 @@ public class ServidorFacade {
         return (facade == null) ? facade = new ServidorFacade() : facade;
     }
 
-    public void cadastrarPerfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, String senha) throws PerfilCadastradoException {
-        this.dados.adicionarPerfil(factory.factoryPerfil(nome, sobrenome, cpf, rg, email, telefone, senha));
-    }
-    
-    public void realizarLogin(String email, String senha) throws LoginRealizadoException, DadosIncorretosException, PerfilNaoCadastradoException{
-        
-             this.dados.realizaLogin(email, senha);
-        
+    public void cadastrarPerfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, String senha) throws PerfilCadastradoException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        this.dados.cadastrarPerfil(factory.factoryPerfil(nome, sobrenome, cpf, rg, email, telefone, dados.cadastrarSenha(senha)));
     }
 
-    /**PERSISTÊNCIA DE DADOS
-     * 
-     * @throws IOException 
-     */   
+    public void realizarLogin(String cpf, String senha) throws LoginRealizadoException, DadosIncorretosException, PerfilNaoCadastradoException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        this.dados.realizarLogin(cpf, senha);
+    }
+    
+    public void cadastrarDocumento(String cpf, byte[] documento) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, DocumentoCadastradoException{
+        dados.cadastrarDocumento(cpf, documento);
+    }
+
+    /**
+     * PERSISTÊNCIA DE DADOS
+     *
+     * @throws IOException
+     */
     public void criandoArquivos() throws IOException {
         dados.criandoArquivos();
     }
@@ -76,6 +80,4 @@ public class ServidorFacade {
      * @param server
      * @throws java.io.IOException *******************************
      */
-   
-
 }

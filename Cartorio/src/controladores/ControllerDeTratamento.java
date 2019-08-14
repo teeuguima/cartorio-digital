@@ -6,13 +6,18 @@
 package controladores;
 
 import excecoes.DadosIncorretosException;
+import excecoes.DocumentoCadastradoException;
 import excecoes.LoginRealizadoException;
+import excecoes.PerfilCadastradoException;
 import excecoes.PerfilNaoCadastradoException;
 import facade.ServidorFacade;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ControllerDeTratamento {
@@ -37,15 +42,20 @@ public class ControllerDeTratamento {
 
     public void respostaCliente(JSONObject resposta) {
         String info = resposta.toString();
-        //BufferedReader buffRead = new BufferedReader();
-        //byte[] bytes = convertToByte(info);
-        mensagem.novaMensagem(info);
+        byte[] bytes = convertToByte(info);
+        System.out.println("Enviando...");
+        mensagem.novaMensagem(bytes);
+    }
+    
+    public String exceptionString(String exception){
+        String[] result = exception.split(": ");
+        return result[1];
     }
 
-    public void tratarMensagem(byte[] bytes) throws IOException, FileNotFoundException, ClassNotFoundException {
+    public void tratarMensagem(byte[] bytes) throws IOException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 
         String info = new String(bytes, StandardCharsets.UTF_8);
-        
+        System.out.println("Entrou...");
         System.out.println(info);
         JSONObject dados = new JSONObject(info);
 
@@ -54,19 +64,29 @@ public class ControllerDeTratamento {
                 try {
                     facade.cadastrarPerfil(dados.getString("nome"), dados.getString("sobrenome"), dados.getString("cpf"),
                             dados.getString("rg"), dados.getString("email"), dados.getString("telefone"), dados.getString("senha"));
-                    dados.put("status", "Cadastro Efetuado!");
+                } catch (PerfilCadastradoException | NoSuchAlgorithmException | JSONException e) {
+                    dados.put("status", exceptionString(e.toString()));
                     respostaCliente(dados);
-                } catch (Exception e) {
                 }
                 break;
             case "Login":
                 try {
-                    facade.realizarLogin(dados.getString("email"), "senha");
+                    facade.realizarLogin(dados.getString("cpf"), dados.getString("senha"));
                 } catch (LoginRealizadoException | DadosIncorretosException | PerfilNaoCadastradoException e) {
-                   // dados.put("status", e.toString());
+                   dados.put("status",exceptionString(e.toString()));
+                   respostaCliente(dados);
                 }
-
                 break;
+            case "CadastrarDocumento":
+                try{
+                    facade.cadastrarDocumento(dados.getString("cpf"), convertToByte(dados.getString("documento")));
+                    
+                }catch( NoSuchAlgorithmException | InvalidKeyException | SignatureException | DocumentoCadastradoException e){
+                    dados.put("status", exceptionString(e.toString()));
+                    respostaCliente(dados);
+                }
+                break;
+            case "TransferirDocumento":
         }
         facade.armazenarDados();
 
