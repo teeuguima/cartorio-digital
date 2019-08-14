@@ -5,8 +5,8 @@
  */
 package cliente;
 
-import controller.ControladorDeMensagens;
-import controller.ControllerDeTratamento;
+import controladores.ControladorDeMensagens;
+import controladores.ControllerDeTratamento;
 import facade.ClienteServidorFacade;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
@@ -57,31 +57,7 @@ public class ClienteTratamento extends Thread {
 
     }
 
-    public void tratarInput(InputStream input) throws IOException {
-        byte[] bytes = toByteArray(input);
-        if (bytes.length > 0) {
-            tratamento.tratarMensagemServidor(bytes);
-        }
-    }
+    
 
-    public void tratarOutput(OutputStream output) throws IOException {
-        if (mensagens.getMensagem().hasMensagem()) {
-            Mensagem mensagem = mensagens.getMensagem();
-            byte[] bytes = mensagem.getBytes();
-            System.out.println(bytes.length);
-            output.write(bytes, 0, bytes.length);
-            output.close();
-            mensagem.enviouMensagem();
-
-        }
-    }
-
-    private byte[] toByteArray(InputStream input) throws IOException {
-        DataInputStream dataInputStream = new DataInputStream(input);
-
-        byte buffer[] = new byte[dataInputStream.available()];
-        dataInputStream.readFully(buffer);
-
-        return buffer;
-    }
+    
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package controller;
+package controladores;
 
 
 import facade.ClienteServidorFacade;
@@ -49,7 +49,9 @@ public class ControllerDeTratamento {
         String info = new String(bytes, StandardCharsets.UTF_8);
         JSONObject dados = new JSONObject(info);
         switch(dados.getString("command")){
-            
+            case "Mensagem":
+                System.out.println(dados.toString());
+                break;
         }
         
     }

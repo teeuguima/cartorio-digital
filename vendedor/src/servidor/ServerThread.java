@@ -8,8 +8,11 @@ package servidor;
 import facade.ClienteServidorFacade;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,42 +20,31 @@ import java.util.Set;
  */
 public class ServerThread extends Thread{
     private ServerSocket server;
-    private Set<TratamentoServidor> serverThread = new HashSet<TratamentoServidor>();
+    private Socket socket;
+    private ThreadConections tcIO;
     private ClienteServidorFacade facade;
     
-    public ServerThread(int porta) throws IOException{
+    public ServerThread(int porta, ClienteServidorFacade facade) throws IOException{
         server = new ServerSocket(porta);
-        this.facade = new ClienteServidorFacade();
+        this.facade = facade;
     }
     
     @Override
     public void run(){
-        try {
-            while(true){
-                TratamentoServidor serverThreadThread = new TratamentoServidor(server.accept(), facade, this);
-                serverThread.add(serverThreadThread);
-                serverThreadThread.start();
+        while(true){
+            
+            try {
+                this.socket = server.accept();
+                System.out.println("O cliente conectado possui o endereço: "+ socket.getInetAddress().getHostAddress());
+                this.tcIO = new ThreadConections(new ConectionIO(socket, facade));
+                new Thread(tcIO).start();
+                //   TratamentoServidor serverThreadThread = new TratamentoServidor(server.accept(),this ,new ConectionIO(server.accept(), facade, this));
+                
+                //   serverThread.add(serverThreadThread);
+                //  serverThreadThread.start();
+            } catch (IOException ex) {
             }
-        } catch (IOException e) {
-            System.out.println(e);
         }
     }
-    
-    public Set<TratamentoServidor> getServerThreadThread(){
-        return serverThread;
-    }
-    
-    public void sendMessage(String messagem){
-        try {
-            serverThread.forEach(t-> t.getPrintWriter().println(messagem));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public Set<TratamentoServidor> getServerThreadThreads(){
-        return serverThread;
-    }
-    
     
 }

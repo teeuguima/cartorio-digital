@@ -3,18 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cliente;
+package model;
 
 /**
  *
  * @author Teeu Guima
  */
-public class ThreadConection extends Thread {
-    private ClienteTratamento cliente;
-    
-    public ThreadConection(ClienteTratamento cliente){
-        this.cliente = cliente;
-    }
-    
+public class Arquivo {
     
 }

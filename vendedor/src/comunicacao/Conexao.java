@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cliente;
+package comunicacao;
 
-import controller.ControladorDeMensagens;
-import controller.ControllerDeTratamento;
+import cliente.ClienteTratamento;
+import cliente.ConectionIO;
+import controladores.ControladorDeMensagens;
+import controladores.ControllerDeTratamento;
 import facade.ClienteServidorFacade;
 import servidor.ServerThread;
 import java.io.IOException;
@@ -30,18 +32,16 @@ public class Conexao {
     public void criarServidor() throws IOException {
         System.out.println("Qual porta deseja para operar seu servidor?");
         int porta = Console.readInt();
-        ServerThread serverTh = new ServerThread(porta);
+        ServerThread serverTh = new ServerThread(porta, facade);
         serverTh.start();
-        System.out.println("Servidor inicializado na porta"+ porta);
+        System.out.println("Servidor inicializado na porta [" + porta+"]");
     }
 
     public void conectarComCliente(String ip, int porta) throws IOException {
         Socket socket = new Socket(ip, porta);
         try {
-            
-            
-        ClienteTratamento tratamento = new ClienteTratamento(new ConectionIO(socket, facade));
-        new Thread(tratamento).start();
+            ClienteTratamento tratamento = new ClienteTratamento(new ConectionIO(socket, facade));
+            new Thread(tratamento).start();
         } catch (IOException e) {
             e.printStackTrace();
         }

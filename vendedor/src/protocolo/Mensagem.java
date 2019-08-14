@@ -14,9 +14,19 @@ public class Mensagem {
     private boolean has;
     private byte[] bytes;
     private String message;
+    private boolean status;
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
     
     public Mensagem() {     
         has = false;
+        status = true;
     }
 
     public String getMessage() {

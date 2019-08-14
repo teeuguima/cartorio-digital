@@ -1,4 +1,4 @@
-package controller;
+package controladores;
 
 import protocolo.Mensagem;
 
@@ -24,6 +24,10 @@ public class ControladorDeMensagens {
         mensagemPessoaFis.setHasMensagemToTrue();
         System.out.println("Setado True");
 
+    }
+    
+    public void fecharConexao(){
+        mensagemPessoaFis.setStatus(false);
     }
 
     public Mensagem getMensagem() {

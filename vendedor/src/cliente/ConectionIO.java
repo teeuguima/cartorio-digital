@@ -5,8 +5,8 @@
  */
 package cliente;
 
-import controller.ControladorDeMensagens;
-import controller.ControllerDeTratamento;
+import controladores.ControladorDeMensagens;
+import controladores.ControllerDeTratamento;
 import facade.ClienteServidorFacade;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
@@ -24,9 +24,8 @@ import protocolo.Mensagem;
  */
 public class ConectionIO {
 
-    private final OutputStream output;
-    private final InputStream input;
-
+//    private final OutputStream output;
+//    private final InputStream input;
     private final ControllerDeTratamento tratamento;
     private final ControladorDeMensagens mensagens;
 
@@ -36,27 +35,26 @@ public class ConectionIO {
         this.mensagens = facade.getMensagem();
         this.tratamento = new ControllerDeTratamento(facade, mensagens);
         this.socket = socket;
-        output = socket.getOutputStream();
-        input = socket.getInputStream();
     }
 
     public void tratar() throws IOException, InterruptedException {
         boolean flag = true;
         while (flag) {
-            tratarOutput();
-            tratarInput();
+            tratarOutput(socket.getOutputStream());
+            tratarInput(socket.getInputStream());
+
         }
 
     }
 
-    public void tratarInput() throws IOException {
-        byte[] bytes = toByteArray(socket.getInputStream());
+    public void tratarInput(InputStream input) throws IOException {
+        byte[] bytes = toByteArray(input);
         if (bytes.length > 0) {
             tratamento.tratarMensagemServidor(bytes);
         }
     }
 
-    public void tratarOutput() throws IOException {
+    public void tratarOutput(OutputStream output) throws IOException {
         if (mensagens.getMensagem().hasMensagem()) {
             Mensagem mensagem = mensagens.getMensagem();
             byte[] bytes = mensagem.getBytes();

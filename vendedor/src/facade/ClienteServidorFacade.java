@@ -2,10 +2,10 @@ package facade;
 
 
 
-import controller.ControladorDeDados;
-import controller.ControladorDeMensagens;
-import controller.ControllerDeTratamento;
-import controller.ControladorFactory;
+import controladores.ControladorDeDados;
+import controladores.ControladorDeMensagens;
+import controladores.ControllerDeTratamento;
+import controladores.ControladorFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,7 +17,8 @@ public class ClienteServidorFacade {
     private final ControladorFactory factory;
     private final ControladorDeMensagens mensagem;
     private static ClienteServidorFacade facade;
-    private JSONObject json;
+    private JSONObject jsonCartorio;
+    private JSONObject jsonCliente;
     /**
      * Méodo construtor se inicializa instanciando cada um os controladores.
      * Essa classe é o que vai acessar todos os controladores e vai ser a classe
@@ -26,7 +27,7 @@ public class ClienteServidorFacade {
      * por ela.
      */
     public ClienteServidorFacade() {
-        dados = ControladorDeDados.getInstance();
+        dados = new ControladorDeDados();
         factory = new ControladorFactory();
         mensagem = new ControladorDeMensagens();
     }
@@ -44,7 +45,7 @@ public class ClienteServidorFacade {
     public void criandoArquivos() throws IOException {
         dados.criandoArquivos();
     }
-
+/*
     public void lerDados() throws IOException, FileNotFoundException, ClassNotFoundException {
         dados.lendoDados();
     }
@@ -52,7 +53,7 @@ public class ClienteServidorFacade {
     public void armazenarDados() throws IOException {
         dados.salvandoDados();
     }
-
+*/
     /**
      * *************************** MÉTODOS PARA A COMUNICAÇÃO
      *
@@ -62,18 +63,30 @@ public class ClienteServidorFacade {
         mensagem.novaMensagem(bytes);
     }
     
+    public void fecharConexao(){
+        mensagem.fecharConexao();
+    }
+    
     public void novaMensagem(String message){
         System.out.println("Passou");
         mensagem.novaMensagem(message);
     }
     
     public JSONObject getRespostaCartorio() throws InterruptedException{
-        Thread.sleep(2000);
-        return this.json;
+        Thread.sleep(1500);
+        return this.jsonCartorio;
     }
     
     public void setRespostaCartorio(JSONObject json){
-        this.json = json;
+        this.jsonCartorio = json;
+    }
+    
+    public JSONObject getRespostaCliente(){
+        return this.jsonCliente;
+    }
+    
+    public void setRespostaCliente(JSONObject json){
+        this.jsonCliente = json;
     }
     
     
