@@ -1,9 +1,7 @@
 package servidor;
 
-import java.io.FileNotFoundException;
+import excecoes.SocketTratadoException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ThreadConections extends Thread {
 
@@ -16,20 +14,14 @@ public class ThreadConections extends Thread {
     @Override
     public void run() {
         boolean flag = true;
-        try {
-            //System.out.println("Entrou!");
-            pessoafisica.tratar();
-
-        } catch (IOException ex) {
-            System.out.println("Erro: " + ex);
-            interrupt();
-            flag = false;
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ThreadConections.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ThreadConections.class.getName()).log(Level.SEVERE, null, ex);
+        while (true) {
+            try {
+                //System.out.println("Entrou!");
+                pessoafisica.tratar();
+                
+            } catch (IOException | InterruptedException | SocketTratadoException | ClassNotFoundException ex) {
+              interrupt();
+            } 
         }
-
     }
-
 }

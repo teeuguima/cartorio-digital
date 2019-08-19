@@ -18,16 +18,16 @@ public class ControladorDeMensagens {
     }
 
     public void novaMensagem(String message) {
-        System.out.println("Passou!");
         mensagemPessoaFis.setMessage(message);
-        System.out.println("Setado");
         mensagemPessoaFis.setHasMensagemToTrue();
-        System.out.println("Setado True");
-
     }
     
     public void fecharConexao(){
-        mensagemPessoaFis.setStatus(false);
+        mensagemPessoaFis.setStatusConexao(false);
+    }
+    
+    public void abrirConexao(){
+        mensagemPessoaFis.setStatusConexao(true);
     }
 
     public Mensagem getMensagem() {

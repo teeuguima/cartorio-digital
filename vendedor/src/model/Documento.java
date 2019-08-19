@@ -5,7 +5,7 @@
  */
 package model;
 
-import java.security.PrivateKey;
+import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
 
@@ -13,23 +13,23 @@ import java.util.ArrayList;
  *
  * @author Teeu Guima
  */
-public class Documento {
-    private int id=0;
-    private Perfil perfil;
-    private byte[] arquivo;
+public class Documento implements Serializable {
+    private String cpf;
+    private static int idD=0;
+    private int id =0;
     private PublicKey pbKey;
-    private PrivateKey pvKey;
+    private byte[] arquivo;
     private byte[] assinatura;
+    private byte[] hashDono;
     
     private ArrayList<byte[]> donosAnteriores;
     
-    public Documento(Perfil perfil, PublicKey pbKey, PrivateKey pvKey, byte[] arquivo, byte[] assinatura) {
-        this.perfil = perfil;
+    public Documento(String cpf, PublicKey pbKey, byte[] arquivo, byte[] assinatura, byte[] hashDono) {
+        this.cpf = cpf;
         this.pbKey = pbKey;
-        this.pvKey = pvKey;
         this.arquivo = arquivo;
         this.assinatura = assinatura;
-        this.id= id+1;
+        this.id= idD++;
     }
 
     public int getId() {
@@ -46,14 +46,6 @@ public class Documento {
 
     public void setAssinatura(byte[] assinatura) {
         this.assinatura = assinatura;
-    }
-    
-    public Perfil getPerfil() {
-        return perfil;
-    }
-
-    public void setPerfil(Perfil perfil) {
-        this.perfil = perfil;
     }
 
     public byte[] getArquivo() {
@@ -72,14 +64,22 @@ public class Documento {
         this.pbKey = pbKey;
     }
 
-    public PrivateKey getPvKey() {
-        return pvKey;
+    public byte[] getHashDono() {
+        return hashDono;
     }
 
-    public void setPvKey(PrivateKey pvKey) {
-        this.pvKey = pvKey;
+    public void setHashDono(byte[] hashDono) {
+        this.hashDono = hashDono;
     }
-    
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
     public void addDonosAnteriores(byte[] assinatura){
         donosAnteriores.add(assinatura);
     }

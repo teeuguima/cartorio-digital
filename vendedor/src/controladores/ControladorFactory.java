@@ -1,5 +1,7 @@
 package controladores;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import model.Perfil;
 
 public class ControladorFactory {
@@ -9,8 +11,8 @@ public class ControladorFactory {
      */
     public ControladorFactory() {} 
     
-    public Perfil factoryPerfil(String nome, String sobrenome, String cpf){
-        return new Perfil(nome, sobrenome, cpf);
+    public Perfil factoryPerfil(String nome, String sobrenome, String cpf,PrivateKey pvKey, PublicKey pbKey){
+        return new Perfil(nome, sobrenome, cpf, pvKey, pbKey);
     }
     
     

@@ -10,7 +10,7 @@ package protocolo;
  * @author Teeu Guima
  */
 public class Mensagem {
-     
+
     private boolean has;
     private byte[] bytes;
     private String message;
@@ -20,11 +20,11 @@ public class Mensagem {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatusConexao(boolean status) {
         this.status = status;
     }
-    
-    public Mensagem() {     
+
+    public Mensagem() {
         has = false;
         status = true;
     }
@@ -36,8 +36,6 @@ public class Mensagem {
     public void setMessage(String message) {
         this.message = message;
     }
-    
-    
 
     public byte[] getBytes() {
         return bytes;
@@ -46,18 +44,16 @@ public class Mensagem {
     public void setBytes(byte[] bytes) {
         this.bytes = bytes;
     }
-    
-    public void setHasMensagemToTrue(){
+
+    public void setHasMensagemToTrue() {
         has = true;
     }
 
-    
-    
-    public boolean hasMensagem(){
-            return has;
+    public boolean hasMensagem() {
+        return has;
     }
-    
-    public void enviouMensagem(){
+
+    public void enviouMensagem() {
         has = false;
     }
 }
