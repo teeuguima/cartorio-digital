@@ -1,11 +1,10 @@
 package comunicacao;
 
-import controladores.ControladorDeMensagens;
-import controladores.ControllerDeTratamento;
 import facade.ServidorFacade;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import util.Console;
 
 public class Conexao {
 
@@ -17,15 +16,6 @@ public class Conexao {
 
     private ServidorFacade facade;
 
-    /* private final ControllerDeTratamento tratamento;
-    private final ControladorDeMensagens mensagens;
-
-    public Conexao(ControllerDeTratamento tratamento, ControladorDeMensagens mensagens, ServerSocket server) {
-        this.tratamento = tratamento;
-        this.mensagens = mensagens;
-        this.serverSocket = server;
-    }
-     */
     public Conexao() {
 
     }
@@ -35,14 +25,11 @@ public class Conexao {
     }
 
     public void iniciar() throws IOException {
-        // conectar();
         criarServerSocket();
         Socket socket = esperandoConexao();
         if (socket.isConnected()) {
             io = new ConectionIO(socket, facade);
-        }
-        //  io = new ConectionIO(socket,tratamento, mensagens);
-
+        }   
     }
 
     public ConectionIO getConectionIO() {
@@ -54,9 +41,11 @@ public class Conexao {
 
     }
 
-    public void criarServerSocket(/*int porta*/) throws IOException {
+    public void criarServerSocket() throws IOException {
         //this.porta = porta;
-        serverSocket = new ServerSocket(PORTACARTORIO);
+        System.out.println("Defina uma porta válida para esse cartório!");
+        this.porta = Console.readInt();
+        serverSocket = new ServerSocket(porta);
     }
 
     public int getPorta() {
@@ -66,14 +55,10 @@ public class Conexao {
     public Socket esperandoConexao() throws IOException {
         //Faz o serverSocket esperar uma conexão, só da o retorno quando a conexão não é estabelecida
         System.out.println("Esperando a resposta do cliente .....");
-        System.out.println("Fique atento se precisar dar permição ao Firewall do seu Sistema Operacional");
+        System.out.println("Fique atento se precisar dar permissão ao Firewall do seu Sistema Operacional");
         Socket socket = serverSocket.accept();
         System.out.println("conexão estabelecida com o cliente");
         return socket;
-    }
-
-    private void conectar() throws IOException {
-        // criarServerSocket(PORTACARTORIO);
     }
 
 }

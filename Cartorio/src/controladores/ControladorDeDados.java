@@ -5,6 +5,7 @@
  */
 package controladores;
 
+import excecoes.AutenticidadeDoDocumentoException;
 import excecoes.DadosIncorretosException;
 import excecoes.DocumentoCadastradoException;
 import excecoes.LoginRealizadoException;
@@ -33,6 +34,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import model.Documento;
 import model.Perfil;
+
 import util.Hash;
 
 /**
@@ -43,25 +45,26 @@ public class ControladorDeDados {
 
     private ArrayList<Perfil> perfis;
     private ArrayList<Documento> docs;
-
-    private Hash logins;
-
-    File filePerfis = null;
-    File fileDocs = null;
-    File fileLogins = null;
+    private final String ALGORITHM = "DSA";
+    private final String signature = "cartoriodigital";
+    File filePerfis;
+    File fileDocs;
 
     public ControladorDeDados() {
         this.perfis = new ArrayList<>();
         this.docs = new ArrayList<>();
-        this.logins = new Hash();
+        this.filePerfis = null;
+        this.fileDocs = null;
     }
 
-    public void cadastrarPerfil(Perfil perfil) throws PerfilCadastradoException {
-        if (!perfis.contains(perfil)) {
+    public boolean cadastrarPerfil(Perfil perfil) throws PerfilCadastradoException {
+        if (!hasPerfil(perfil.getCpf())) {
             perfis.add(perfil);
-            throw new PerfilCadastradoException("Perfil cadastrado com sucesso!");
-        } else{
-            throw new PerfilCadastradoException("Perfil já cadastrado");
+            return true;
+            // throw new PerfilCadastradoException("Perfil cadastrado com sucesso!");
+        } else {
+            //  throw new PerfilCadastradoException("Perfil já cadastrado!");
+            return false;
         }
     }
 
@@ -99,75 +102,129 @@ public class ControladorDeDados {
         return senhaCripto;
     }
 
-    public void realizarLogin(String cpf, String senha) throws LoginRealizadoException, PerfilNaoCadastradoException, DadosIncorretosException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public Perfil realizarLogin(String cpf, String senha) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (hasPerfil(cpf)) {
             Perfil p = buscarPerfil(cpf);
             if (Arrays.equals(p.getSenhaCriptografada(), validarSenha(senha))) {
-                throw new LoginRealizadoException("Login efetuado com sucesso!");
+                return p;
             } else {
-                throw new DadosIncorretosException("Dados invalidos!");
+                return null;
             }
-        }
-        throw new PerfilNaoCadastradoException("Perfil não encontrado!");
-    }
-
-    public void cadastrarDocumento(String cpf, byte[] documento) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, DocumentoCadastradoException {
-        Signature sigDono = Signature.getInstance("DSA");
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
-        SecureRandom secRand = new SecureRandom();
-
-        kpg.initialize(512, secRand);
-        KeyPair keyP = kpg.generateKeyPair();
-
-        PublicKey pbKey = keyP.getPublic();
-        PrivateKey pvKey = keyP.getPrivate();
-
-        sigDono.initSign(pvKey);
-        sigDono.update(documento);
-        byte[] assinatura = sigDono.sign();
-
-        Documento doc = new Documento(buscarPerfil(cpf), pbKey, pvKey, documento, assinatura);
-        if(!docs.contains(doc)){
-            docs.add(doc);
-            throw new DocumentoCadastradoException("Documento cadastrado!");
-        }else{
-            throw new DocumentoCadastradoException("Documento já cadastrado no sistema!");
-        }
-        
-    }
-    
-    public ArrayList<Documento> buscarDocumento(String cpf){
-        ArrayList<Documento> docsm = new ArrayList<>();
-        if(hasPerfil(cpf)){
-            Iterator iterDocs = docs.iterator();
-            while(iterDocs.hasNext()){
-                Documento doc = (Documento) iterDocs.next();
-                Perfil perf = buscarPerfil(cpf);
-                if(doc.getPerfil().equals(perf)){
-                    doc = new Documento(perf.getCpf(), perf.getNome(), perf.getSobrenome(),doc.getArquivo());
-                    docsm.add(doc);
-                    
-                }
-            }
-            return docsm;
         }
         return null;
     }
 
-    public boolean validarDocumento(String cpf, PublicKey pbKey, byte[] arquivo, byte[] assinatura) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-        Signature clienteSign = Signature.getInstance("DSA");
-        if (hasPerfil(cpf)) {
-            for (Documento doc : docs) {
-                clienteSign.initVerify(pbKey);
-                clienteSign.update(assinatura);
-                if (doc.getPerfil().getCpf().equals(cpf) && clienteSign.verify(assinatura)) {
-                    return true;
-                }
+    public boolean hasDocumento(byte[] documento) {
+        Iterator iterDocs = docs.iterator();
+        while (iterDocs.hasNext()) {
+            Documento doc = (Documento) iterDocs.next();
+            if (Arrays.equals(doc.getArquivo(), documento)) {
+                return true;
             }
         }
         return false;
     }
 
+    public KeyPair chavesDeSeguranca(String cpf) throws NoSuchAlgorithmException {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(ALGORITHM);
+        SecureRandom secRand = new SecureRandom(cpf.getBytes());
+        kpg.initialize(512, secRand);
+
+        KeyPair keyP = kpg.generateKeyPair();
+        return keyP;
+    }
+
+    public byte[] assinaturaCartorio() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(ALGORITHM);
+        SecureRandom secRand = new SecureRandom();
+        kpg.initialize(512, secRand);
+
+        KeyPair keyP = kpg.generateKeyPair();
+        Signature signCartorio = Signature.getInstance(ALGORITHM);
+        signCartorio.initSign(keyP.getPrivate());
+        signCartorio.update(signature.getBytes());
+        return signCartorio.sign();
+    }
+
+    public byte[] geradorDeHash(String cpf) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte hashPosse[] = md.digest(cpf.getBytes("UTF-8"));
+        return hashPosse;
+    }
+
+    public void cadastrarDocumento(String cpf, byte[] documento) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, DocumentoCadastradoException, UnsupportedEncodingException, PerfilNaoCadastradoException {
+
+        if (hasPerfil(cpf)) {
+            Perfil p = buscarPerfil(cpf);
+            ArrayList<Documento> docss = p.getDocumentos();
+            if (!hasDocumento(documento)) {
+                Signature sigDono = Signature.getInstance(ALGORITHM);
+                sigDono.initSign(p.getPvKey());
+                sigDono.update(documento);
+                byte[] assinatura = sigDono.sign();
+                Documento doc = new Documento(p.getPbKey(), documento, assinatura, p.getHash(), assinaturaCartorio());
+                p.getDocumentos().add(doc);
+                this.docs.add(doc);
+                throw new DocumentoCadastradoException("Documento cadastrado!");
+            } else {
+                throw new DocumentoCadastradoException("Documento já cadastrado no sistema!");
+            }
+        } else {
+            throw new PerfilNaoCadastradoException("Não há perfil cadastrado com este cpf!");
+        }
+    }
+
+    public ArrayList<Documento> buscarDocumento(String cpf) throws PerfilNaoCadastradoException {
+        if (hasPerfil(cpf)) {
+            Perfil p = buscarPerfil(cpf);
+            return p.getDocumentos();
+
+        } else {
+            return null;
+            // throw new PerfilNaoCadastradoException("Não há perfil cadastrado com este cpf!");
+        }
+    }
+
+    public void validarDocumento(String cpf, PublicKey pbKey, byte[] arquivo, byte[] assinatura) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, AutenticidadeDoDocumentoException, PerfilNaoCadastradoException {
+        if (hasPerfil(cpf)) {
+            Perfil p = buscarPerfil(cpf);
+            if (hasDocumento(arquivo)) {
+                Signature sign = Signature.getInstance(ALGORITHM);
+                Iterator iterDocs = p.getDocumentos().iterator();
+                while (iterDocs.hasNext()) {
+                    Documento doc = (Documento) iterDocs.next();
+                    sign.initVerify(pbKey);
+                    sign.update(arquivo);
+                    if (sign.verify(assinatura)) {
+                        throw new AutenticidadeDoDocumentoException("Documento autêntico!");
+                    } else {
+                        throw new AutenticidadeDoDocumentoException("Documento não pertencente ao cpf consultado!");
+                    }
+                }
+            }
+
+        } else {
+            throw new PerfilNaoCadastradoException("Não há perfil cadastrado com este cpf!");
+        }
+    }
+
+    public void removerDocumento(String cpfDono, PublicKey pbKey, byte[] assinatura) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        if (!hasPerfil(cpfDono)) {
+            Perfil p = buscarPerfil(cpfDono);
+            Signature sign = Signature.getInstance(ALGORITHM);
+            Iterator iterDocs = p.getDocumentos().iterator();
+            while (iterDocs.hasNext()) {
+                Documento doc = (Documento) iterDocs.next();
+                sign.initVerify(pbKey);
+                sign.update(doc.getArquivo());
+                if (sign.verify(assinatura)) {
+                    p.getDocumentos().remove(doc);
+                }
+            }
+        }
+    }
+
+    /*
     public void transferirDocumento(String cpfDonoAnterior, String cpfNovoDono, PrivateKey pvKey, byte[] arquivo,
             byte[] assinatura) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 
@@ -196,9 +253,9 @@ public class ControladorDeDados {
             }
         }
     }
-
+     */
     public KeyPairGenerator geradorDeChave() throws NoSuchAlgorithmException {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance(ALGORITHM);
         SecureRandom secRand = new SecureRandom();
         kpg.initialize(512, secRand);
 
@@ -206,18 +263,15 @@ public class ControladorDeDados {
     }
 
     public void salvandoDados() throws FileNotFoundException, IOException {
-        if (this.perfis != null && this.perfis.isEmpty()) {
+        if (this.perfis != null || this.perfis.isEmpty()) {
             ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(filePerfis));
             output.writeObject(this.perfis);
         }
-        if (this.docs != null && this.docs.isEmpty()) {
+        if (this.docs != null || this.docs.isEmpty()) {
             ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(fileDocs));
             output.writeObject(this.docs);
         }
-        if (this.logins != null && this.logins.isEmpty()) {
-            ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(fileLogins));
-            output.writeObject(this.logins);
-        }
+
     }
 
     public void lendoDados() throws FileNotFoundException, IOException, ClassNotFoundException {
@@ -229,7 +283,7 @@ public class ControladorDeDados {
                 inputPerfis.close();
             }
         }
-
+       
         if (fileDocs.length() > 0) {
             ObjectInputStream inputDocs = new ObjectInputStream(new FileInputStream(fileDocs));
             if (this.docs.isEmpty()) {
@@ -237,7 +291,8 @@ public class ControladorDeDados {
                 inputDocs.close();
             }
         }
-        /*
+        
+ /*
         if (filePilotos.length() > 0) {
             ObjectInputStream inputPilotos = new ObjectInputStream(new FileInputStream(filePilotos));
             if (this.pilotos.isEmpty()) {
@@ -256,17 +311,16 @@ public class ControladorDeDados {
          */
     }
 
-    public void criandoArquivos() throws IOException {
+    public void criandoArquivos() throws IOException, FileNotFoundException, ClassNotFoundException {
         filePerfis = new File("fileperfis.txt");
         if (!filePerfis.exists()) {
             filePerfis = new File("fileperfis.txt");
         }
-
-        fileLogins = new File("fileslogins.txt");
-        if (!fileLogins.exists()) {
-            fileLogins = new File("filelogins.txt");
+        /* fileDocs = new File("filedocs.txt");
+        if (!fileDocs.exists()) {
+            fileDocs = new File("filedocs.txt");
         }
-
+         */
         fileDocs = new File("filedocs.txt");
         if (!fileDocs.exists()) {
             fileDocs = new File("filedocs.txt");

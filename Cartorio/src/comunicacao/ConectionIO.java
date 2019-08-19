@@ -2,6 +2,9 @@ package comunicacao;
 
 import controladores.ControladorDeMensagens;
 import controladores.ControllerDeTratamento;
+import excecoes.PerfilCadastradoException;
+import excecoes.PerfilNaoCadastradoException;
+import excecoes.SocketTratadoException;
 import facade.ServidorFacade;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
@@ -13,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 public class ConectionIO {
 
@@ -21,7 +25,7 @@ public class ConectionIO {
     //  private final InputStream input;
     private final ControllerDeTratamento tratamento;
     private final ControladorDeMensagens mensagens;
-
+    private final ServidorFacade facade;
     private Socket socket;
 
     /*
@@ -37,50 +41,46 @@ public class ConectionIO {
         this.mensagens = new ControladorDeMensagens();
         this.tratamento = new ControllerDeTratamento(facade, mensagens);
         this.socket = socket;
+        this.facade = facade;
         //  output = socket.getOutputStream();
         //  input = socket.getInputStream();
     }
 
-    public void tratar() throws IOException, InterruptedException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public void tratar() throws IOException, InterruptedException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, PerfilNaoCadastradoException, SocketTratadoException, PerfilCadastradoException, InvalidKeySpecException {
         boolean flag = true;
-        while (flag) {
-            if (socket.isConnected()) {
+        if (socket.isConnected()) {
+            while (flag) {
                 if (socket.getInputStream().available() > 0) {
-
                     tratarInput();
                     tratarOutput(socket.getOutputStream());
-
                 }
             }
-
             //fecharSocket(socket);
         }
     }
 
-    private void tratarOutput(OutputStream output) throws IOException {
+    private void tratarOutput(OutputStream output) throws IOException, SocketTratadoException {
         if (socket.isConnected()) {
-            System.out.println("Enviando...");
             if (mensagens.getMensagem().hasMensagem()) {
-                System.out.println("Mensagem a");
                 Mensagem mensagem = mensagens.getMensagem();
                 byte[] bytes = mensagem.getBytes();
                 output.write(bytes, 0, bytes.length);
                 output.flush();
                 mensagens.getMensagem().enviouMensagem();
-               // fecharSocket(socket);
+                facade.armazenarDados();
+                throw new SocketTratadoException();
+                // fecharSocket(socket);
             } else {
-                System.out.println("Não tem mensagem");
             }
         }
     }
 
-    private void tratarInput() throws IOException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private void tratarInput() throws IOException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, PerfilNaoCadastradoException, PerfilCadastradoException, InvalidKeySpecException {
         //  BufferedReader bufferRead = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         byte[] bytes = toByteArray(socket.getInputStream());
         if (socket.isConnected()) {
             if (bytes.length > 0) {
                 String dados = new String(bytes, StandardCharsets.UTF_8);
-                System.out.println(dados);
                 tratamento.tratarMensagem(bytes);
             }
 
@@ -91,7 +91,6 @@ public class ConectionIO {
         DataInputStream dataInputStream = new DataInputStream(input);
 
         byte buffer[] = new byte[dataInputStream.available()];
-        System.out.println(buffer.length);
         dataInputStream.readFully(buffer);
 
         return buffer;

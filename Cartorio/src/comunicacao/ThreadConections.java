@@ -1,6 +1,16 @@
 package comunicacao;
 
+import excecoes.PerfilCadastradoException;
+import excecoes.PerfilNaoCadastradoException;
+import excecoes.SocketTratadoException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ThreadConections extends Thread {
 
@@ -12,21 +22,16 @@ public class ThreadConections extends Thread {
 
     @Override
     public void run() {
-        boolean flag = true;
-       // while (flag) {
+        while (true) {
             try {
-                //System.out.println("Entrou!");
                 pessoafisica.tratar();
 
-            } catch (IOException | ClassNotFoundException ex) {
-               //System.out.println("Erro: " + ex);
+            } catch (IOException | ClassNotFoundException | PerfilCadastradoException | InvalidKeySpecException
+                    | InterruptedException | PerfilNaoCadastradoException | SocketTratadoException | NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
+                //System.out.println("Erro: " + ex);
                 interrupt();
-                flag = false;
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
             }
-       // }
+        }
 
     }
-
 }

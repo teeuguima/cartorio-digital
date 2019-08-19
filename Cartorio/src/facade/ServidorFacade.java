@@ -7,6 +7,7 @@ import controladores.ControladorDeDados;
 import controladores.ControladorDeMensagens;
 import controladores.ControllerDeTratamento;
 import controladores.ControladorFactory;
+import excecoes.AutenticidadeDoDocumentoException;
 import excecoes.DadosIncorretosException;
 import excecoes.DocumentoCadastradoException;
 import excecoes.LoginRealizadoException;
@@ -17,9 +18,17 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Iterator;
+import model.Documento;
 import model.Perfil;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import util.ConvertKey;
 
 public class ServidorFacade {
 
@@ -27,6 +36,7 @@ public class ServidorFacade {
     private final ControladorFactory factory;
     private final ControladorDeClientes clientes;
     private static ServidorFacade facade;
+    private ConvertKey convert;
 
     /**
      * Méodo construtor se inicializa instanciando cada um os controladores.
@@ -39,22 +49,53 @@ public class ServidorFacade {
         dados = new ControladorDeDados();
         factory = new ControladorFactory();
         clientes = new ControladorDeClientes();
+        convert = new ConvertKey();
     }
 
     public static synchronized ServidorFacade getInstance() throws IOException, FileNotFoundException, ClassNotFoundException {
         return (facade == null) ? facade = new ServidorFacade() : facade;
     }
 
-    public void cadastrarPerfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, String senha) throws PerfilCadastradoException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        this.dados.cadastrarPerfil(factory.factoryPerfil(nome, sobrenome, cpf, rg, email, telefone, dados.cadastrarSenha(senha)));
+    public String[] cadastrarPerfil(String nome, String sobrenome, String cpf, String rg, String email, String telefone, String senha) throws PerfilCadastradoException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        KeyPair keyP = dados.chavesDeSeguranca(cpf);
+        boolean flag = this.dados.cadastrarPerfil(factory.factoryPerfil(nome, sobrenome, cpf, rg, email, telefone,
+                dados.cadastrarSenha(senha), dados.geradorDeHash(cpf), keyP.getPrivate(), keyP.getPublic()));
+        String[] keys = new String[2];
+        if (flag) {
+            keys[0] = convert.converterPrivateKey(keyP.getPrivate());
+            keys[1] = convert.converterPublicKey(keyP.getPublic());
+            return keys;
+        } else {
+            String[] status = new String[1];
+            status[1] = "Perfil já cadastrado!";
+            return status;
+        }
     }
 
-    public void realizarLogin(String cpf, String senha) throws LoginRealizadoException, DadosIncorretosException, PerfilNaoCadastradoException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        this.dados.realizarLogin(cpf, senha);
+    public void validarDocumento(String cpf, String pbKey, byte[] arquivo, byte[] assinatura) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, AutenticidadeDoDocumentoException, PerfilNaoCadastradoException, InvalidKeySpecException {
+        dados.validarDocumento(cpf, convert.convertStringToPublicKey(pbKey), arquivo, assinatura);
     }
-    
-    public void cadastrarDocumento(String cpf, byte[] documento) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, DocumentoCadastradoException{
-        dados.cadastrarDocumento(cpf, documento);
+
+    public Perfil realizarLogin(String cpf, String senha) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        return this.dados.realizarLogin(cpf, senha);
+    }
+
+    public void removerDocumento(String cpf, PublicKey pbKey, byte[] assinatura) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        this.dados.removerDocumento(cpf, pbKey, assinatura);
+    }
+
+    public void cadastrarDocumento(String cpf, byte[] documento) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, DocumentoCadastradoException, UnsupportedEncodingException, PerfilNaoCadastradoException {
+        this.dados.cadastrarDocumento(cpf, documento);
+    }
+
+    public ArrayList<Documento> buscarDocumento(String cpf) throws PerfilNaoCadastradoException {
+        ArrayList<Documento> docs = this.dados.buscarDocumento(cpf);
+        Iterator iterDocs = docs.iterator();
+
+        while (iterDocs.hasNext()) {
+            Documento doc = (Documento) iterDocs.next();
+        }
+        return docs;
     }
 
     /**
@@ -62,7 +103,7 @@ public class ServidorFacade {
      *
      * @throws IOException
      */
-    public void criandoArquivos() throws IOException {
+    public void criandoArquivos() throws IOException, FileNotFoundException, ClassNotFoundException {
         dados.criandoArquivos();
     }
 

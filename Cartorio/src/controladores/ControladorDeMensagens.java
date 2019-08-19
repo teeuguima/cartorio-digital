@@ -11,7 +11,6 @@ public class ControladorDeMensagens {
     }
 
     public void novaMensagem(byte[] bytes) {
-        System.out.println("Enviandooo");
         mensagemPessoaFis.setBytes(bytes);
         mensagemPessoaFis.setHasMensagemToTrue();
 

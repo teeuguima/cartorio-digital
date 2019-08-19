@@ -1,44 +1,46 @@
-/*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package model;
 
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.ArrayList;
+import util.ConvertKey;
 
 /**
  *
  * @author Teeu Guima
  */
-public class Documento {
-    private int id=0;
-    private Perfil perfil;
-    private String cpf;
-    private String nome;
-    private String sobrenome;
+public class Documento implements Serializable {
+    private static final long serialVersionUID = 8679233356940587626L;
+    private static int idD = 0;
+    private int id = 0;
+    private ConvertKey convert;
     private byte[] arquivo;
     private PublicKey pbKey;
-    private PrivateKey pvKey;
+    private byte[] assinaturaCartorio;
     private byte[] assinatura;
+    private byte[] hashDono;
     
     private ArrayList<byte[]> donosAnteriores;
-    
-    public Documento(Perfil perfil, PublicKey pbKey, PrivateKey pvKey, byte[] arquivo, byte[] assinatura) {
-        this.perfil = perfil;
+
+    public Documento(PublicKey pbKey, byte[] arquivo, byte[] assinatura, byte[] hashDono, byte[] assCartorio) {
         this.pbKey = pbKey;
-        this.pvKey = pvKey;
         this.arquivo = arquivo;
         this.assinatura = assinatura;
-        this.id= id+1;
-    }
-    
-    public Documento(String cpf, String nome, String sobrenome,  byte[] arquivo) {
-        this.cpf = cpf;
-        this.sobrenome = sobrenome;
-        this.arquivo = arquivo;
+        this.hashDono = hashDono;
+        this.assinaturaCartorio = assCartorio;
+        id = idD++;
+        this.convert = new ConvertKey();
     }
 
     public int getId() {
@@ -55,14 +57,6 @@ public class Documento {
 
     public void setAssinatura(byte[] assinatura) {
         this.assinatura = assinatura;
-    }
-    
-    public Perfil getPerfil() {
-        return perfil;
-    }
-
-    public void setPerfil(Perfil perfil) {
-        this.perfil = perfil;
     }
 
     public byte[] getArquivo() {
@@ -81,16 +75,20 @@ public class Documento {
         this.pbKey = pbKey;
     }
 
-    public PrivateKey getPvKey() {
-        return pvKey;
+    public void alterarPosse(PrivateKey pvKey, PublicKey pbKey, byte[] hashNovoDono) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        this.donosAnteriores.add(hashDono);
+        this.pbKey = pbKey;
+        
+        Signature sign = Signature.getInstance("DSA");
+        sign.initSign(pvKey);
+        
+        sign.update(this.arquivo);
+        this.assinatura= sign.sign();
     }
 
-    public void setPvKey(PrivateKey pvKey) {
-        this.pvKey = pvKey;
-    }
-    
-    public void addDonosAnteriores(byte[] assinatura){
-        donosAnteriores.add(assinatura);
+    @Override
+    public String toString() {
+        return "Documento{" + "Id=" + id + ", Chave Publica=" +convert.converterPublicKey(pbKey) + ", Assinatura=" + new String(assinatura, StandardCharsets.UTF_8)+ ", Arquivo" + '}';
     }
     
     
