@@ -14,9 +14,9 @@ import java.io.OutputStream;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-/**
+/**Classe responsável por gerenciar os arquivos neste sistema!
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães 
  */
 public class GerenteArquivos {
 

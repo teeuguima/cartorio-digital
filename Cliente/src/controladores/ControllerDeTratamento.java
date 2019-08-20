@@ -11,10 +11,18 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import model.Documento;
 import org.json.JSONObject;
 import util.ConvertKey;
 
+/**
+ * Classe responsável por todo o tratamento de entrada do servidor (Cartório),
+ * utilizando a classe Facade para intermediar as operações do Controller -
+ * ControladorDeDados. Responde as requisições utilizando JSONObject.
+ *
+ * @author Mateus Guimarães
+ */
 public class ControllerDeTratamento {
 
     private ClienteServidorFacade facade;
@@ -27,14 +35,32 @@ public class ControllerDeTratamento {
         this.convert = new ConvertKey();
     }
 
+    /**
+     * Método que converte uma string em array de byte
+     *
+     * @param string
+     * @return Array de byte.
+     */
     public byte[] convertToByte(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Método para conversão de um array de byte em String
+     *
+     * @param dados
+     * @return String
+     */
     public String convertToString(byte[] dados) {
         return new String(dados, StandardCharsets.UTF_8);
     }
 
+    /**Método para que a classe de controle de mensagens
+     * avise a classe de tratamento da conexão que há respostas
+     * ao cliente conectado.
+     * 
+     * @param resposta 
+     */
     public void respostaCliente(JSONObject resposta) {
         String info = resposta.toString();
         byte[] bytes = convertToByte(info);
@@ -50,7 +76,7 @@ public class ControllerDeTratamento {
         //facade.armazenarDados();
     }
 
-    public void tratarMensagemCliente(byte[] bytes) {
+    public void tratarMensagemCliente(byte[] bytes) throws InvalidKeySpecException {
         String info = new String(bytes, StandardCharsets.UTF_8);
         JSONObject dados = new JSONObject(info);
         switch (dados.getString("command")) {
@@ -66,7 +92,7 @@ public class ControllerDeTratamento {
                 break;
             case "TransferirDocumento":
                 try {
-                    doc = facade.transferirPosseDeDocumento(dados.getInt("idDocumento"), dados.getString("cpf"));
+                    doc = facade.transferirPosseDeDocumento(dados.getInt("idDocumento"), dados.getString("cpf"), convert.convertStringToPublicKey(dados.getString("chavePublica")), convertToByte(dados.getString("assinatura")));
                     dados.put("documento", (Object) doc);
 
                     respostaCliente(dados);

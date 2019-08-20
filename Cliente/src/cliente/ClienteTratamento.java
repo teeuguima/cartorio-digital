@@ -8,10 +8,8 @@ package cliente;
 import excecoes.SocketTratadoException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
+/**Classe que herda Thread afim de gerenciar as conexões com servidores/clientes 
  *
  * @author Teeu Guima
  */
@@ -31,7 +29,6 @@ public class ClienteTratamento extends Thread {
     public void run() {
         while (true) {
             try {
-                //System.out.println("Entrou!");
                 cliente.tratar();
             } catch (IOException | InterruptedException | SocketTratadoException ex) {
                 //ex.printStackTrace();

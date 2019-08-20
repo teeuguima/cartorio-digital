@@ -10,9 +10,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 
-/**
+/**Classe responsável pela identificação dos
+ * clientes cadastrados no sistema.
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães 
  */
 public class Perfil implements Serializable {
 

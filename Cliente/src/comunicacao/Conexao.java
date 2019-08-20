@@ -16,14 +16,14 @@ import java.io.IOException;
 import java.net.Socket;
 import util.Console;
 
-/**
- * Classe responsável por operar as conexões com servidor.
+/**Classe tem por função criar um serverSocket para escutar as conexões
+ * estabelecidas na porta definida e criar conexões para diferentes
+ * servidores, sendo clientes ou cartórios!
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães
  */
 public class Conexao {
 
-    private final int PORTASERVIDOR = 5665;
     private ClienteServidorFacade facade;
     private ServerThread serverTh;
     public Conexao(ClienteServidorFacade facade) throws IOException, FileNotFoundException, ClassNotFoundException {

@@ -17,9 +17,9 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 
-/**
+/**Classe para Codificação e Decodificação de chaves privadas e públicas!
  *
- * @author Teeu Guima
+ * @author Some Java Stuff (Blog)
  */
 public class ConvertKey {
     private final String ALGORITHM = "DSA";

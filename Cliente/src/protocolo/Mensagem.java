@@ -1,13 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package protocolo;
 
-/**
- *
- * @author Teeu Guima
+/**Classe responsável por aplicar um protocolo
+ * para encapsular as mensagens de entrada e 
+ * saída do servidor.
+ * 
+ * @author Mateus Guimarães
  */
 public class Mensagem {
 

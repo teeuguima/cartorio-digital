@@ -22,11 +22,12 @@ import util.Console;
 import util.ConvertKey;
 import util.GerenteArquivos;
 
-/**
+/**Classe principal, responsável pela execução e entrada de dados, exibição das sáidas 
+ * e etc...
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães
  */
-public class PessoaFisica {
+public class Cliente {
 
     private static Conexao conexao;
     private ClienteServidorFacade facade;
@@ -35,7 +36,7 @@ public class PessoaFisica {
     private ConvertKey convert;
     private GerenteArquivos garqs;
 
-    public PessoaFisica() throws IOException, FileNotFoundException, ClassNotFoundException {
+    public Cliente() throws IOException, FileNotFoundException, ClassNotFoundException {
         //facade = new ClienteServidorFacade();
         facade = new ClienteServidorFacade(new ControladorDeMensagens());
         conexao = new Conexao(facade);
@@ -43,6 +44,12 @@ public class PessoaFisica {
         garqs = new GerenteArquivos();
     }
 
+    /**
+     * Método para controle da opção de retorno ao menu!
+     *
+     * @param opc
+     * @return int
+     */
     private int voltarMenu(String opc) {
         this.opc = opc;
         if (opc.equals("S") | opc.equals("s")) {
@@ -88,10 +95,19 @@ public class PessoaFisica {
         return opc;
     }
 
+    /**
+     * Opções para serem realizadas ao contatar um cliente!
+     *
+     * @return int
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public int menuCliente() throws IOException, InterruptedException {
         int opc = 0;
         try {
-            System.out.println("Menu Cartório Digital");
+            System.out.println("*****************************");
+            System.out.println("[ Menu Cartório Digital ]");
+            System.out.println("*****************************");
             System.out.println(
                     "1- Solicitar Arquivo Para Autenticar\n"
                     + "2- Solicitar Transferência\n");
@@ -114,14 +130,32 @@ public class PessoaFisica {
         return opc;
     }
 
+    /**
+     * Método para converter uma String em array de byte
+     *
+     * @param dados
+     * @return array de byte.
+     */
     public byte[] convertToByte(String dados) {
         return dados.getBytes(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Método para converter um array de byte em String.
+     *
+     * @param bytes
+     * @return String
+     */
     public String convertToString(byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Método para realizar uma conexão a um servidor, especificamente um
+     * cartório que irá responder as requisições deste cliente.
+     *
+     * @throws IOException
+     */
     public void conectarAoCartorio() throws IOException {
         System.out.println("*****************************");
         System.out.println("Para se conectar ao cartório, informe o endereço ip e a porta deste cartório!");
@@ -131,10 +165,15 @@ public class PessoaFisica {
         int porta = Console.readInt();
 
         conexao.conectarComCliente(endereco, porta);
-        //conexao.conectarComCliente("localhost", 5555);
-        //conexao.conectarComCliente("172.16.103.8", 5555);
     }
 
+    /**
+     * Método responsável pela conexão com um cliente/servidor que tem como
+     * papel de enviar informações sobre documentos solicitados.
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void conectarComUmCliente() throws IOException, InterruptedException {
         System.out.println("Informe o endereço ip e porta de quem irá se conectar");
         System.out.println("[Endereço]:");
@@ -145,6 +184,12 @@ public class PessoaFisica {
         menuCliente();
     }
 
+    /**
+     * Método que solicita documento a um cliente específico!
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void solicitarUmDocumento() throws IOException, InterruptedException {
         System.out.println("Informe o id do documento que deseja solicitar para conferir");
         int idDoc = Console.readInt();
@@ -155,7 +200,7 @@ public class PessoaFisica {
 
         facade.novaMensagem(convertToByte(json.toString()));
         json = facade.getRespostaCartorio();
-        
+
         facade.abrirConexaoCartorio();
         JSONObject requisicao = new JSONObject();
         requisicao.put("command", "ValidarDocumento");
@@ -169,6 +214,12 @@ public class PessoaFisica {
         System.out.println(requisicao.getString("status"));
     }
 
+    /**
+     * Método que solicita a transferência de um documento para um cliente,
+     * alterando a posse do mesmo!
+     *
+     * @throws IOException
+     */
     public void solicitarTransferencia() throws IOException {
         System.out.println("Informe o id do documento!");
         int idDoc = Console.readInt();
@@ -183,6 +234,17 @@ public class PessoaFisica {
         facade.novaMensagem(convertToByte(requisicao.toString()));
     }
 
+    /**
+     * Método que realiza um cadastro de documento selecionado na memória,
+     * informando ao cartório a posse deste.
+     *
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws SignatureException
+     */
     public void cadastrarDocumento() throws FileNotFoundException, IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         String opc = null;
         do {
@@ -212,6 +274,13 @@ public class PessoaFisica {
         } while (opc.compareTo("S") == 0 || opc.compareTo("s") == 0);
     }
 
+    /**
+     * Metódo para solicitação de informações sobre documentos ligados ao cpf
+     * consultado!
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void buscarDocumento() throws IOException, InterruptedException {
         System.out.println("*****************************");
         System.out.println("Informe o Nº do CPF para obter o(s) documento(s)!");
@@ -240,6 +309,14 @@ public class PessoaFisica {
 
     }
 
+    /**
+     * Método para cadastrar as informações pessoais no servidor/ cartório!
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     */
     public void cadastroNoCartorio() throws IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
         String op;
 
@@ -256,26 +333,25 @@ public class PessoaFisica {
 
         System.out.println("Senha:");
         String senha = Console.readString();
-        /*
+
         System.out.println("Informe o número do RG:");
         String rg = Console.readString();
 
         System.out.println("Informe um email e uma senha valida");
         System.out.println("Email:");
         String email = Console.readString();
-        
+
         System.out.println("Informe seu Telefone:");
         String telefone = Console.readString();
-         */
 
         JSONObject dados = new JSONObject();
 
         dados.put("nome", nome);
         dados.put("sobrenome", sobrenome);
         dados.put("cpf", cpf);
-        dados.put("rg", "");
-        dados.put("email", "");
-        dados.put("telefone", "");
+        dados.put("rg", rg);
+        dados.put("email", email);
+        dados.put("telefone", telefone);
         dados.put("senha", senha);
         dados.put("command", "CadastroPerfil");
 
@@ -300,6 +376,14 @@ public class PessoaFisica {
 
     }
 
+    /**
+     * Método para realizar login no servidor/cartório!
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws InvalidKeySpecException
+     * @throws NoSuchAlgorithmException
+     */
     public void loginNoCartorio() throws IOException, InterruptedException, InvalidKeySpecException, NoSuchAlgorithmException {
         System.out.println("*****************************");
         System.out.println("Para realizar login:");
@@ -330,7 +414,16 @@ public class PessoaFisica {
         }
     }
 
-    public void realizarLogin() throws IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
+    /**
+     * Método responsável por gerenciar as ações iniciais do cliente em
+     * execução!
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     */
+    public void acessoAoCartorio() throws IOException, InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException {
         conectarAoCartorio();
         System.out.println("\n*****************************\n");
         System.out.println("Possui perfil cadastrado no cartório? S/N");
@@ -343,21 +436,28 @@ public class PessoaFisica {
 
     }
 
+    /**
+     * Método para criar um servidor interno para tratar as comunicações de
+     * outros clientes.
+     *
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws ClassNotFoundException
+     */
     public void inicializaServidor() throws IOException, FileNotFoundException, ClassNotFoundException {
         conexao.criarServidor();
-        //  facade.criandoArquivos();
-        //  facade.lerDados();
+
     }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, FileNotFoundException, InvalidKeyException, SignatureException, ClassNotFoundException, IOException {
-        PessoaFisica pessoa = new PessoaFisica();
+        Cliente pessoa = new Cliente();
         int repeat = 0;
         try {
             pessoa.inicializaServidor();
-            pessoa.realizarLogin(); //Conecta ao cartório para realizar login!
+            pessoa.acessoAoCartorio(); //Conecta ao cartório para realizar login!
             do {
                 System.out.println("\nO que desejas realizar?\n");
                 int controle = pessoa.menuPrincipal();
@@ -369,12 +469,12 @@ public class PessoaFisica {
                         break;
 
                     case 2:
-                        //   do {
+
                         pessoa.buscarDocumento();
-                        //   } while (repeat == 1);
+
                         break;
                     case 3:
-                        // admin.iniciaPartida();
+
                         pessoa.conectarComUmCliente();
                         break;
                 }

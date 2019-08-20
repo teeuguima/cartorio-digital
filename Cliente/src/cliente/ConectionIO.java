@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.SocketException;
 import protocolo.Mensagem;
 
-/**
+/**Classe responsável por tratar as conexões realizadas
+ * com servidores/clientes, enviando e recebendo mensagens.
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães
  */
 public class ConectionIO {
 
@@ -37,17 +37,33 @@ public class ConectionIO {
         this.socket = socket;
     }
 
+    /**
+     * Este método confere input e output do servidor. Primeiramente há
+     * verificação de conexão e em seguida um loop para manter ativa a
+     * verificação de entrada e saída.
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws SocketTratadoException
+     */
     public void tratar() throws IOException, InterruptedException, SocketTratadoException {
         boolean flag = true;
         if (socket.isConnected()) {
             while (flag) {
                 tratarOutput(socket.getOutputStream());
                 tratarInput(socket.getInputStream());
-             //   facade.armazenarDados();
+                facade.armazenarDados();
             }
         }
     }
 
+    /**Método para verificação e tratamento da entrada
+     * enviada por um servidor, a entrada é conferida e
+     * respondida.
+     *
+     * @param input
+     * @throws IOException
+     */
     public void tratarInput(InputStream input) throws IOException {
         byte[] bytes = toByteArray(input);
         if (bytes.length > 0) {
@@ -55,6 +71,13 @@ public class ConectionIO {
         }
     }
 
+    /**
+     * Método para tratamento da saída/resposta para o cliente.
+     *
+     * @param output
+     * @throws IOException
+     * @throws SocketTratadoException
+     */
     public void tratarOutput(OutputStream output) throws IOException, SocketTratadoException {
         if (mensagens.getMensagem().isStatus()) {
             if (mensagens.getMensagem().hasMensagem()) {
@@ -70,6 +93,13 @@ public class ConectionIO {
         } 
     }
 
+    /**Método conversor de InputStream em array de bytes, afim de
+     * tratar a mensagem vinda de qualquer Sistema.
+     * 
+     * @param input
+     * @return
+     * @throws IOException 
+     */
     private byte[] toByteArray(InputStream input) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(input);
 

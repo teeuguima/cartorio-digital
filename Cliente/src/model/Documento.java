@@ -9,9 +9,10 @@ import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
 
-/**
+/**Classe que encapsula as informações de propriedade 
+ * dos documentos cadastrados por um cliente.
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães
  */
 public class Documento implements Serializable {
     private String cpf;

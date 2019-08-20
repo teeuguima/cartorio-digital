@@ -13,9 +13,10 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
+/**Classe que estende Thread para poder atender
+ * clientes diferentes.
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães 
  */
 public class ServerThread extends Thread {
 
