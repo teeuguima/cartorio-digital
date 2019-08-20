@@ -18,34 +18,45 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 
+/**
+ * Classe responsável por tratar as conexões que o servidor(Cartório)
+ * estabelece, verificando a informação de entrada e como saída uma resposta
+ * sobre a requisição.
+ *
+ * @author Mateus Guimarães.
+ */
 public class ConectionIO {
 
-    //tratamento de mensagem e checagem de mensagem
-    //  private final OutputStream output;
-    //  private final InputStream input;
     private final ControllerDeTratamento tratamento;
     private final ControladorDeMensagens mensagens;
     private final ServidorFacade facade;
     private Socket socket;
 
-    /*
-    public ConectionIO(Socket socket, ControllerDeTratamento tratamento, ControladorDeMensagens mensagens) throws IOException {
-        this.tratamento = tratamento;
-        this.mensagens = mensagens;
-        this.socket = socket;
-        output = socket.getOutputStream();
-        input = socket.getInputStream();
-    }
-     */
     public ConectionIO(Socket socket, ServidorFacade facade) throws IOException {
         this.mensagens = new ControladorDeMensagens();
         this.tratamento = new ControllerDeTratamento(facade, mensagens);
         this.socket = socket;
         this.facade = facade;
-        //  output = socket.getOutputStream();
-        //  input = socket.getInputStream();
+
     }
 
+    /**
+     * Este método confere input e output do servidor. Primeiramente há
+     * verificação de conexão e em seguida um loop para manter ativa a
+     * verificação de entrada e saída.
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws FileNotFoundException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws SignatureException
+     * @throws PerfilNaoCadastradoException
+     * @throws SocketTratadoException
+     * @throws PerfilCadastradoException
+     * @throws InvalidKeySpecException
+     */
     public void tratar() throws IOException, InterruptedException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, PerfilNaoCadastradoException, SocketTratadoException, PerfilCadastradoException, InvalidKeySpecException {
         boolean flag = true;
         if (socket.isConnected()) {
@@ -55,10 +66,17 @@ public class ConectionIO {
                     tratarOutput(socket.getOutputStream());
                 }
             }
-            //fecharSocket(socket);
+
         }
     }
 
+    /**
+     * Método para tratamento da saída/resposta ao cliente.
+     *
+     * @param output
+     * @throws IOException
+     * @throws SocketTratadoException
+     */
     private void tratarOutput(OutputStream output) throws IOException, SocketTratadoException {
         if (socket.isConnected()) {
             if (mensagens.getMensagem().hasMensagem()) {
@@ -69,35 +87,48 @@ public class ConectionIO {
                 mensagens.getMensagem().enviouMensagem();
                 facade.armazenarDados();
                 throw new SocketTratadoException();
-                // fecharSocket(socket);
+
             } else {
             }
         }
     }
 
+    /**Método para verificação e tratamento da entrada
+     * enviada por um cliente, a entrada é conferida e
+     * respondida.
+     *
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws SignatureException
+     * @throws PerfilNaoCadastradoException
+     * @throws PerfilCadastradoException
+     * @throws InvalidKeySpecException
+     */
     private void tratarInput() throws IOException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, PerfilNaoCadastradoException, PerfilCadastradoException, InvalidKeySpecException {
-        //  BufferedReader bufferRead = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         byte[] bytes = toByteArray(socket.getInputStream());
-        if (socket.isConnected()) {
-            if (bytes.length > 0) {
-                String dados = new String(bytes, StandardCharsets.UTF_8);
-                tratamento.tratarMensagem(bytes);
-            }
 
+        if (bytes.length > 0) {
+            tratamento.tratarMensagem(bytes); //Chamada ao método da classe responsável por tratar o input.
         }
+
     }
 
+    /**Método conversor de InputStream em array de bytes, afim de
+     * tratar a mensagem vinda de qualquer Sistema.
+     * 
+     * @param input
+     * @return
+     * @throws IOException 
+     */
     private byte[] toByteArray(InputStream input) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(input);
-
         byte buffer[] = new byte[dataInputStream.available()];
         dataInputStream.readFully(buffer);
-
         return buffer;
     }
 
-    public void fecharSocket(Socket socket) throws IOException {
-        socket.close();
-    }
 
 }

@@ -6,6 +6,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import util.Console;
 
+/**
+ * Classe tem por função criar um serverSocket para escutar as conexões
+ * estabelecidas na porta definida!
+ *
+ * @author Mateus Guimarães
+ */
 public class Conexao {
 
     private ServerSocket serverSocket;
@@ -23,26 +29,18 @@ public class Conexao {
     public Conexao(ServidorFacade facade) {
         this.facade = facade;
     }
-
-    public void iniciar() throws IOException {
-        criarServerSocket();
-        Socket socket = esperandoConexao();
-        if (socket.isConnected()) {
-            io = new ConectionIO(socket, facade);
-        }   
-    }
-
-    public ConectionIO getConectionIO() {
-        return io;
-    }
-
+    
     public ServerSocket getSocket() {
         return serverSocket;
 
     }
 
+    /**
+     * Método que solicita uma porta para inicialização do servidor.
+     *
+     * @throws IOException
+     */
     public void criarServerSocket() throws IOException {
-        //this.porta = porta;
         System.out.println("Defina uma porta válida para esse cartório!");
         this.porta = Console.readInt();
         serverSocket = new ServerSocket(porta);
@@ -52,8 +50,14 @@ public class Conexao {
         return porta;
     }
 
+    /**Método que escuta conexões na porta definida,
+     * retornando um socket obtido!
+     * 
+     * @return Socket
+     * @throws IOException 
+     */
     public Socket esperandoConexao() throws IOException {
-        //Faz o serverSocket esperar uma conexão, só da o retorno quando a conexão não é estabelecida
+        //Faz o serverSocket esperar uma conexão, só da o retorno quando a conexão é estabelecida
         System.out.println("Esperando a resposta do cliente .....");
         System.out.println("Fique atento se precisar dar permissão ao Firewall do seu Sistema Operacional");
         Socket socket = serverSocket.accept();

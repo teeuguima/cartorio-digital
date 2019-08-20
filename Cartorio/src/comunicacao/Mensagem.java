@@ -1,5 +1,11 @@
 package comunicacao;
 
+/**Classe responsável por aplicar um protocolo
+ * para encapsular as mensagens de entrada e 
+ * saída do servidor.
+ * 
+ * @author Mateus Guimarães
+ */
 public class Mensagem {
     
     private boolean has;
@@ -38,8 +44,6 @@ public class Mensagem {
         has = true;
     }
 
-    
-    
     public boolean hasMensagem(){
         return has;
     }

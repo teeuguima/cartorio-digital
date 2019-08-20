@@ -1,22 +1,16 @@
 package facade;
 
-import comunicacao.ConectionIO;
 import java.util.ArrayList;
-import controladores.ControladorDeClientes;
+
 import controladores.ControladorDeDados;
-import controladores.ControladorDeMensagens;
-import controladores.ControllerDeTratamento;
 import controladores.ControladorFactory;
 import excecoes.AutenticidadeDoDocumentoException;
-import excecoes.DadosIncorretosException;
 import excecoes.DocumentoCadastradoException;
-import excecoes.LoginRealizadoException;
 import excecoes.PerfilCadastradoException;
 import excecoes.PerfilNaoCadastradoException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.ServerSocket;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -26,15 +20,13 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Iterator;
 import model.Documento;
 import model.Perfil;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import util.ConvertKey;
 
 public class ServidorFacade {
 
     private final ControladorDeDados dados;
     private final ControladorFactory factory;
-    private final ControladorDeClientes clientes;
+;
     private static ServidorFacade facade;
     private ConvertKey convert;
 
@@ -48,7 +40,6 @@ public class ServidorFacade {
     public ServidorFacade() throws IOException, FileNotFoundException, ClassNotFoundException {
         dados = new ControladorDeDados();
         factory = new ControladorFactory();
-        clientes = new ControladorDeClientes();
         convert = new ConvertKey();
     }
 

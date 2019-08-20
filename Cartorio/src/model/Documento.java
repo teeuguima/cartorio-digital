@@ -16,9 +16,10 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import util.ConvertKey;
 
-/**
+/**Classe que encapsula as informações de propriedade 
+ * dos documentos cadastrados por um cliente.
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães
  */
 public class Documento implements Serializable {
     private static final long serialVersionUID = 8679233356940587626L;

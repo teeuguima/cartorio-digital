@@ -8,7 +8,6 @@ package util;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
-import static java.security.KeyRep.Type.PUBLIC;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -19,9 +18,9 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 
-/**
+/**Classe para Codificação e Decodificação de chaves privadas e públicas!
  *
- * @author Teeu Guima
+ * @author Some Java Stuff (Blog)
  */
 public class ConvertKey implements Serializable {
     private final String ALGORITHM = "DSA";

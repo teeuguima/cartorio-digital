@@ -6,9 +6,7 @@
 package controladores;
 
 import excecoes.AutenticidadeDoDocumentoException;
-import excecoes.DadosIncorretosException;
 import excecoes.DocumentoCadastradoException;
-import excecoes.LoginRealizadoException;
 import excecoes.PerfilCadastradoException;
 import excecoes.PerfilNaoCadastradoException;
 import facade.ServidorFacade;
@@ -25,10 +23,16 @@ import java.util.Iterator;
 import model.Documento;
 import model.Perfil;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import util.ConvertKey;
 
+/**Classe responsável por todo o tratamento de entrada
+ * do servidor (Cartório), utilizando a classe Facade
+ * para intermediar as operações do Controller - ControladorDeDados.
+ * Responde as requisições utilizando JSONObject.
+ * 
+ * @author Mateus Guimarães
+ */
 public class ControllerDeTratamento {
 
     private ServidorFacade facade;
@@ -41,25 +45,63 @@ public class ControllerDeTratamento {
         this.convert = new ConvertKey();
     }
 
+    /**Método que converte uma string em array de byte
+     * 
+     * @param string
+     * @return Array de byte.
+     */
     public byte[] convertToByte(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
     }
-
+    
+    /**Método para conversão de um array de byte em String
+     * 
+     * @param dados
+     * @return String 
+     */
     public String convertToString(byte[] dados) {
         return new String(dados, StandardCharsets.UTF_8);
     }
-
+    
+    /**Método para que a classe de controle de mensagens
+     * avise a classe de tratamento da conexão que há respostas
+     * ao cliente conectado.
+     * 
+     * @param resposta 
+     */
     public void respostaCliente(JSONObject resposta) {
         String info = resposta.toString();
         byte[] bytes = convertToByte(info);
         mensagem.novaMensagem(bytes);
     }
-
+    
+    /**Método que captura a exceção e trata,
+     * retornando a informação principal.
+     * 
+     * @param exception
+     * @return String
+     */
     public String exceptionString(String exception) {
         String[] result = exception.split(": ");
         return result[1];
     }
-
+    
+    /**Método fundamental para o controle da comunicação
+     * destinando adequadamente cada operação desejada
+     * pelo cliente e retornando com êxito as respostas 
+     * adquiridas pelo Controlador de Dados.
+     * 
+     * @param bytes
+     * @throws IOException
+     * @throws FileNotFoundException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws SignatureException
+     * @throws PerfilNaoCadastradoException
+     * @throws PerfilCadastradoException
+     * @throws InvalidKeySpecException 
+     */
     public void tratarMensagem(byte[] bytes) throws IOException, FileNotFoundException, ClassNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, PerfilNaoCadastradoException, PerfilCadastradoException, InvalidKeySpecException {
 
         String info = new String(bytes, StandardCharsets.UTF_8);

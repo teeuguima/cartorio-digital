@@ -13,12 +13,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 
-/**
+/**Classe principal para execução dos serviços de
+ * cartório.
  *
- * @author Teeu Guima
+ * @author Mateus Guimarães
  */
 public class Cartorio {
-
     private static ServidorFacade facade;
     private static ThreadConections tcIO;
 
@@ -31,26 +31,25 @@ public class Cartorio {
     }
     
     public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException, IOException {
-        //Cartorio cartorio = new Cartorio();
-        //  ServerSocket serverSock = new ServerSocket(5555);
-        //  cartorio.conexao.criarServerSocket();
+        
         Cartorio cartorio = new Cartorio();
         cartorio.getFacade().criandoArquivos();
         cartorio.getFacade().lerDados();
-        Conexao conexao = new Conexao(facade);
+        Conexao conexao = new Conexao(facade); //Classe responsável pela criação de conexões
         conexao.criarServerSocket();
         try {
             while (true) {
-                
+                /**Espera a conexão de algum cliente, se houver conexão estabelecida
+                 * uma thread para tratar a conexão é lançada e executada!
+                 * 
+                 */
                 Socket socket = conexao.esperandoConexao();
                 tcIO = new ThreadConections(new ConectionIO(socket, facade));
-                //tcIO = new ThreadConections(facade.getConectionIOADM(), facade.getConectionIOSensor());
                 new Thread(tcIO).start();
                 
             }
         } catch (IOException | NullPointerException ex) {
-            // ex.printStackTrace();
-            // System.out.println("Erro" + ex);
+        
         }
     }
 
