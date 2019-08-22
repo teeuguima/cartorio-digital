@@ -311,12 +311,14 @@ public class ControladorDeDados {
                 Iterator iterDocs = p.getDocumentos().iterator();
                 while (iterDocs.hasNext()) {
                     Documento doc = (Documento) iterDocs.next();
-                    sign.initVerify(pbKey);
-                    sign.update(arquivo);
-                    if (sign.verify(assinatura)) {
-                        throw new AutenticidadeDoDocumentoException("Documento autêntico!");
-                    } else {
-                        throw new AutenticidadeDoDocumentoException("Documento não pertencente ao cpf consultado!");
+                    if (Arrays.equals(doc.getArquivo(), arquivo)) {
+                        sign.initVerify(pbKey);
+                        sign.update(arquivo);
+                        if (sign.verify(assinatura)) {
+                            throw new AutenticidadeDoDocumentoException("Documento autêntico!");
+                        } else {
+                            throw new AutenticidadeDoDocumentoException("Documento não pertencente ao cpf consultado!");
+                        }
                     }
                 }
             }
@@ -326,15 +328,17 @@ public class ControladorDeDados {
         }
     }
 
-    /**Método responsável por remover um documento através do cpf do proprietário,
-     * chave pública e sua assinatura. Retirando assim de sua lista de documentos;
-     * 
+    /**
+     * Método responsável por remover um documento através do cpf do
+     * proprietário, chave pública e sua assinatura. Retirando assim de sua
+     * lista de documentos;
+     *
      * @param cpfDono
      * @param pbKey
      * @param assinatura
      * @throws NoSuchAlgorithmException
      * @throws SignatureException
-     * @throws InvalidKeyException 
+     * @throws InvalidKeyException
      */
     public void removerDocumento(String cpfDono, PublicKey pbKey, byte[] assinatura) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         if (!hasPerfil(cpfDono)) {
@@ -343,30 +347,34 @@ public class ControladorDeDados {
             Iterator iterDocs = p.getDocumentos().iterator();
             while (iterDocs.hasNext()) {
                 Documento doc = (Documento) iterDocs.next();
-                sign.initVerify(pbKey);
-                sign.update(doc.getArquivo());
-                if (sign.verify(assinatura)) {
-                    p.getDocumentos().remove(doc);
+                if (Arrays.equals(doc.getAssinatura(), assinatura)) {
+                    sign.initVerify(pbKey);
+                    sign.update(doc.getArquivo());
+                    if (sign.verify(assinatura)) {
+                        p.getDocumentos().remove(doc);
+                    }
                 }
+
             }
         }
     }
-    
-    /**Método responsável por transferir documento para um novo dono,
-     * conferindo a existência deste dono no cartório. A substituição de 
-     * posso é realizada em um método interno do documento, que recebe a chave
-     * privada, publica, assinatura e a hash do novo dono.
-     * 
+
+    /**
+     * Método responsável por transferir documento para um novo dono, conferindo
+     * a existência deste dono no cartório. A substituição de posso é realizada
+     * em um método interno do documento, que recebe a chave privada, publica,
+     * assinatura e a hash do novo dono.
+     *
      * @param cpfDonoAnterior
      * @param cpfNovoDono
      * @param pbKey
      * @param arquivo
      * @param assinatura
-     * @return boolean, true se a operação foi concluida com êxito, false se houver erros de existência do perfil ou de
-     * falhas na operação.
+     * @return boolean, true se a operação foi concluida com êxito, false se
+     * houver erros de existência do perfil ou de falhas na operação.
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
-     * @throws SignatureException 
+     * @throws SignatureException
      */
     public boolean transferirDocumento(String cpfDonoAnterior, String cpfNovoDono, PublicKey pbKey, byte[] arquivo,
             byte[] assinatura) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
@@ -378,25 +386,28 @@ public class ControladorDeDados {
             Iterator iterDoc = antigoDono.getDocumentos().iterator();
             while (iterDoc.hasNext()) {
                 Documento doc = (Documento) iterDoc.next();
-                signDono.initVerify(pbKey);
-                signDono.update(arquivo);
-                if (signDono.verify(assinatura)) {
-                    removerDocumento(cpfDonoAnterior, pbKey, assinatura);
-                    doc.alterarPosse(novoDono.getPvKey(), novoDono.getPbKey(), novoDono.getHash());
-                    return true;
-                } else {
-                    return false;
+                if (Arrays.equals(doc.getArquivo(), arquivo)) {
+                    signDono.initVerify(pbKey);
+                    signDono.update(arquivo);
+                    if (signDono.verify(assinatura)) {
+                        removerDocumento(cpfDonoAnterior, pbKey, assinatura);
+                        doc.alterarPosse(novoDono.getPvKey(), novoDono.getPbKey(), novoDono.getHash());
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             }
         }
         return false;
     }
-    
-    /**Método responsável por atualizar o arquivo de persistência de dados!
-     * O mesmo atualiza o arquivo com os novos dados inseridos nas estruturas.
-     * 
+
+    /**
+     * Método responsável por atualizar o arquivo de persistência de dados! O
+     * mesmo atualiza o arquivo com os novos dados inseridos nas estruturas.
+     *
      * @throws FileNotFoundException
-     * @throws IOException 
+     * @throws IOException
      */
     public void salvandoDados() throws FileNotFoundException, IOException {
         if (this.perfis != null || this.perfis.isEmpty()) {
@@ -410,11 +421,13 @@ public class ControladorDeDados {
 
     }
 
-    /**Método responsável por ler os dados armazenados nos arquivos e sobrescrever!
-     * 
+    /**
+     * Método responsável por ler os dados armazenados nos arquivos e
+     * sobrescrever!
+     *
      * @throws FileNotFoundException
      * @throws IOException
-     * @throws ClassNotFoundException 
+     * @throws ClassNotFoundException
      */
     public void lendoDados() throws FileNotFoundException, IOException, ClassNotFoundException {
 
@@ -435,19 +448,20 @@ public class ControladorDeDados {
         }
     }
 
-    /**Método responsável por criar os arquivos de textos essenciais
-     * para a persistência de dados do servidor (Cartório).
-     * 
+    /**
+     * Método responsável por criar os arquivos de textos essenciais para a
+     * persistência de dados do servidor (Cartório).
+     *
      * @throws IOException
      * @throws FileNotFoundException
-     * @throws ClassNotFoundException 
+     * @throws ClassNotFoundException
      */
     public void criandoArquivos() throws IOException, FileNotFoundException, ClassNotFoundException {
         filePerfis = new File("fileperfis.txt");
         if (!filePerfis.exists()) {
             filePerfis = new File("fileperfis.txt");
         }
-        
+
         fileDocs = new File("filedocs.txt");
         if (!fileDocs.exists()) {
             fileDocs = new File("filedocs.txt");
